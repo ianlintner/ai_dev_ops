@@ -1,0 +1,95 @@
+# Example 1: Inference Latency Metric
+{
+  "timestamp": "2025-11-13T22:00:00.000Z",
+  "metric_name": "inference_latency",
+  "value": 0.542,
+  "unit": "seconds",
+  "model": {
+    "name": "gpt-4",
+    "version": "1.0.0",
+    "provider": "openai"
+  },
+  "environment": "production",
+  "labels": {
+    "region": "us-east-1",
+    "service": "ai-inference-api"
+  },
+  "metadata": {
+    "request_id": "req-123456",
+    "user_id": "user-789",
+    "session_id": "session-abc"
+  }
+}
+
+# Example 2: Token Usage Metric
+{
+  "timestamp": "2025-11-13T22:00:01.500Z",
+  "metric_name": "token_usage",
+  "value": 150,
+  "unit": "tokens",
+  "model": {
+    "name": "claude-2",
+    "version": "2.1",
+    "provider": "anthropic"
+  },
+  "environment": "production",
+  "labels": {
+    "token_type": "output",
+    "region": "us-west-2"
+  },
+  "metadata": {
+    "request_id": "req-123457"
+  }
+}
+
+# Example 3: Inference Cost Metric
+{
+  "timestamp": "2025-11-13T22:00:02.000Z",
+  "metric_name": "inference_cost",
+  "value": 0.003,
+  "unit": "dollars",
+  "model": {
+    "name": "gpt-4",
+    "version": "1.0.0",
+    "provider": "openai"
+  },
+  "environment": "production",
+  "labels": {
+    "cost_type": "api_usage"
+  }
+}
+
+# Example 4: Error Rate Metric
+{
+  "timestamp": "2025-11-13T22:00:03.000Z",
+  "metric_name": "error_rate",
+  "value": 2.5,
+  "unit": "percentage",
+  "model": {
+    "name": "llama-2",
+    "version": "70b",
+    "provider": "meta"
+  },
+  "environment": "production",
+  "labels": {
+    "error_type": "timeout",
+    "service": "ai-inference-api"
+  }
+}
+
+# Example 5: Throughput Metric
+{
+  "timestamp": "2025-11-13T22:00:04.000Z",
+  "metric_name": "throughput",
+  "value": 125.5,
+  "unit": "requests_per_second",
+  "model": {
+    "name": "gpt-4",
+    "provider": "azure"
+  },
+  "environment": "production",
+  "labels": {
+    "region": "eastus",
+    "instance": "ai-prod-01"
+  }
+}

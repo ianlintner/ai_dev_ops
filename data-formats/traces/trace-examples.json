@@ -1,0 +1,228 @@
+# Example 1: Complete AI Inference Trace
+{
+  "trace_id": "abcd1234efgh5678ijkl9101mnop1121",
+  "span_id": "qrst3141uvwx5161",
+  "name": "ai_inference_pipeline",
+  "kind": "INTERNAL",
+  "start_time": "2025-11-13T22:00:00.000Z",
+  "end_time": "2025-11-13T22:00:00.542Z",
+  "status": {
+    "code": "OK"
+  },
+  "attributes": {
+    "service.name": "ai-inference-service",
+    "ai.model.name": "gpt-4",
+    "ai.model.version": "1.0.0",
+    "ai.inference.latency_ms": 542,
+    "ai.tokens.input": 45,
+    "ai.tokens.output": 150,
+    "ai.cost": 0.003,
+    "request.id": "req-123456",
+    "user.id": "user-789"
+  },
+  "events": [
+    {
+      "name": "preprocessing_started",
+      "timestamp": "2025-11-13T22:00:00.010Z",
+      "attributes": {
+        "input.length": 256
+      }
+    },
+    {
+      "name": "inference_started",
+      "timestamp": "2025-11-13T22:00:00.050Z",
+      "attributes": {
+        "model": "gpt-4"
+      }
+    },
+    {
+      "name": "token_chunk_generated",
+      "timestamp": "2025-11-13T22:00:00.300Z",
+      "attributes": {
+        "tokens": 50
+      }
+    },
+    {
+      "name": "inference_completed",
+      "timestamp": "2025-11-13T22:00:00.520Z",
+      "attributes": {
+        "total_tokens": 150
+      }
+    }
+  ],
+  "resource": {
+    "service.name": "ai-inference-service",
+    "service.version": "2.1.0",
+    "deployment.environment": "production",
+    "cloud.provider": "aws",
+    "cloud.region": "us-east-1"
+  }
+}
+
+# Example 2: Nested Spans (Parent-Child Relationship)
+[
+  {
+    "trace_id": "yzab7181cdef9202ghij3222klmn4242",
+    "span_id": "opqr5252stuv6262",
+    "name": "process_request",
+    "kind": "SERVER",
+    "start_time": "2025-11-13T22:00:10.000Z",
+    "end_time": "2025-11-13T22:00:10.750Z",
+    "status": {
+      "code": "OK"
+    },
+    "attributes": {
+      "service.name": "ai-api-gateway",
+      "http.method": "POST",
+      "http.status_code": 200,
+      "http.route": "/api/inference"
+    }
+  },
+  {
+    "trace_id": "yzab7181cdef9202ghij3222klmn4242",
+    "span_id": "wxyz7272abcd8282",
+    "parent_span_id": "opqr5252stuv6262",
+    "name": "preprocess_input",
+    "kind": "INTERNAL",
+    "start_time": "2025-11-13T22:00:10.010Z",
+    "end_time": "2025-11-13T22:00:10.050Z",
+    "status": {
+      "code": "OK"
+    },
+    "attributes": {
+      "preprocessing.type": "normalize",
+      "input.size": 256
+    }
+  },
+  {
+    "trace_id": "yzab7181cdef9202ghij3222klmn4242",
+    "span_id": "efgh9292ijkl0303",
+    "parent_span_id": "opqr5252stuv6262",
+    "name": "model_inference",
+    "kind": "CLIENT",
+    "start_time": "2025-11-13T22:00:10.050Z",
+    "end_time": "2025-11-13T22:00:10.650Z",
+    "status": {
+      "code": "OK"
+    },
+    "attributes": {
+      "ai.model.name": "gpt-4",
+      "ai.tokens.input": 45,
+      "ai.tokens.output": 150,
+      "ai.inference.latency_ms": 600
+    },
+    "events": [
+      {
+        "name": "tokens_generated",
+        "timestamp": "2025-11-13T22:00:10.640Z",
+        "attributes": {
+          "tokens": 150
+        }
+      }
+    ]
+  },
+  {
+    "trace_id": "yzab7181cdef9202ghij3222klmn4242",
+    "span_id": "mnop1313qrst2424",
+    "parent_span_id": "opqr5252stuv6262",
+    "name": "postprocess_output",
+    "kind": "INTERNAL",
+    "start_time": "2025-11-13T22:00:10.650Z",
+    "end_time": "2025-11-13T22:00:10.700Z",
+    "status": {
+      "code": "OK"
+    },
+    "attributes": {
+      "output.format": "json",
+      "output.size": 512
+    }
+  }
+]
+
+# Example 3: Error Trace
+{
+  "trace_id": "uvwx3434yzab4545cdef5656ghij6767",
+  "span_id": "klmn7878opqr8989",
+  "name": "ai_inference",
+  "kind": "INTERNAL",
+  "start_time": "2025-11-13T22:00:20.000Z",
+  "end_time": "2025-11-13T22:00:25.000Z",
+  "status": {
+    "code": "ERROR",
+    "message": "Model inference timeout"
+  },
+  "attributes": {
+    "service.name": "ai-inference-service",
+    "ai.model.name": "claude-2",
+    "error.type": "TimeoutError",
+    "error.message": "Request timed out after 5000ms",
+    "timeout.threshold_ms": 5000
+  },
+  "events": [
+    {
+      "name": "exception",
+      "timestamp": "2025-11-13T22:00:25.000Z",
+      "attributes": {
+        "exception.type": "TimeoutError",
+        "exception.message": "Request timed out after 5000ms",
+        "exception.stacktrace": "Traceback (most recent call last):\n  File \"inference.py\", line 42\n    result = model.generate()\nTimeoutError"
+      }
+    }
+  ]
+}
+
+# Example 4: Multi-Agent Workflow Trace
+{
+  "trace_id": "stuv9090wxyz0101abcd1212efgh2323",
+  "span_id": "ijkl3434mnop4545",
+  "name": "multi_agent_workflow",
+  "kind": "INTERNAL",
+  "start_time": "2025-11-13T22:00:30.000Z",
+  "end_time": "2025-11-13T22:00:32.500Z",
+  "status": {
+    "code": "OK"
+  },
+  "attributes": {
+    "workflow.type": "collaborative",
+    "workflow.agents": 3,
+    "workflow.total_tokens": 450
+  },
+  "events": [
+    {
+      "name": "agent_1_execution",
+      "timestamp": "2025-11-13T22:00:30.500Z",
+      "attributes": {
+        "agent.id": "research-agent",
+        "agent.role": "researcher",
+        "tokens_used": 100
+      }
+    },
+    {
+      "name": "agent_2_execution",
+      "timestamp": "2025-11-13T22:00:31.500Z",
+      "attributes": {
+        "agent.id": "analysis-agent",
+        "agent.role": "analyzer",
+        "tokens_used": 200
+      }
+    },
+    {
+      "name": "agent_3_execution",
+      "timestamp": "2025-11-13T22:00:32.250Z",
+      "attributes": {
+        "agent.id": "synthesis-agent",
+        "agent.role": "synthesizer",
+        "tokens_used": 150
+      }
+    }
+  ],
+  "links": [
+    {
+      "trace_id": "previous_workflow_trace_id_here",
+      "span_id": "previous_span_id_here",
+      "attributes": {
+        "link.type": "continuation"
+      }
+    }
+  ]
+}

@@ -1,0 +1,152 @@
+# Example 1: Successful Inference Log
+{
+  "timestamp": "2025-11-13T22:00:00.123Z",
+  "level": "INFO",
+  "message": "Inference completed successfully",
+  "logger": "ai.inference.service",
+  "trace_id": "abcd1234efgh5678",
+  "span_id": "ijkl9101",
+  "model": {
+    "name": "gpt-4",
+    "version": "1.0.0"
+  },
+  "inference": {
+    "latency_ms": 542,
+    "tokens_input": 45,
+    "tokens_output": 150,
+    "cost": 0.003
+  },
+  "request": {
+    "id": "req-123456",
+    "user_id": "user-789",
+    "session_id": "session-abc"
+  },
+  "environment": "production",
+  "metadata": {
+    "region": "us-east-1",
+    "service_version": "2.1.0"
+  }
+}
+
+# Example 2: Error Log
+{
+  "timestamp": "2025-11-13T22:00:05.456Z",
+  "level": "ERROR",
+  "message": "Inference failed due to timeout",
+  "logger": "ai.inference.service",
+  "trace_id": "mnop1121qrst3141",
+  "span_id": "uvwx5161",
+  "model": {
+    "name": "claude-2",
+    "version": "2.1"
+  },
+  "inference": {
+    "latency_ms": 5000,
+    "tokens_input": 120
+  },
+  "request": {
+    "id": "req-123457",
+    "user_id": "user-456"
+  },
+  "error": {
+    "type": "TimeoutError",
+    "message": "Model inference timed out after 5000ms",
+    "stack_trace": "Traceback (most recent call last):\n  File \"inference.py\", line 42, in run_inference\n    result = model.generate(prompt)\nTimeoutError: Request timed out"
+  },
+  "environment": "production",
+  "metadata": {
+    "retry_count": 2,
+    "timeout_threshold_ms": 5000
+  }
+}
+
+# Example 3: Request Started Log
+{
+  "timestamp": "2025-11-13T22:00:10.789Z",
+  "level": "INFO",
+  "message": "Starting inference request",
+  "logger": "ai.inference.service",
+  "trace_id": "yzab7181cdef9202",
+  "span_id": "ghij3222",
+  "model": {
+    "name": "llama-2",
+    "version": "70b"
+  },
+  "request": {
+    "id": "req-123458",
+    "user_id": "user-321",
+    "session_id": "session-xyz"
+  },
+  "environment": "production",
+  "metadata": {
+    "prompt_length": 256,
+    "max_tokens": 500
+  }
+}
+
+# Example 4: Token Usage Warning
+{
+  "timestamp": "2025-11-13T22:00:15.234Z",
+  "level": "WARNING",
+  "message": "Token usage approaching limit",
+  "logger": "ai.token.monitor",
+  "trace_id": "klmn4242opqr5252",
+  "model": {
+    "name": "gpt-4"
+  },
+  "request": {
+    "id": "req-123459",
+    "user_id": "user-654"
+  },
+  "environment": "production",
+  "metadata": {
+    "tokens_used": 7500,
+    "token_limit": 8000,
+    "usage_percentage": 93.75
+  }
+}
+
+# Example 5: Performance Debug Log
+{
+  "timestamp": "2025-11-13T22:00:20.567Z",
+  "level": "DEBUG",
+  "message": "Performance metrics for inference",
+  "logger": "ai.performance.monitor",
+  "trace_id": "stuv6262wxyz7272",
+  "span_id": "abcd8282",
+  "model": {
+    "name": "gpt-4",
+    "version": "1.0.0"
+  },
+  "inference": {
+    "latency_ms": 345,
+    "tokens_input": 67,
+    "tokens_output": 234
+  },
+  "request": {
+    "id": "req-123460"
+  },
+  "environment": "production",
+  "metadata": {
+    "preprocessing_ms": 12,
+    "inference_ms": 320,
+    "postprocessing_ms": 13,
+    "tokens_per_second": 67.8,
+    "queue_time_ms": 5
+  }
+}
+
+# Example 6: Cost Alert Log
+{
+  "timestamp": "2025-11-13T22:00:25.890Z",
+  "level": "WARNING",
+  "message": "Daily cost threshold exceeded",
+  "logger": "ai.cost.monitor",
+  "environment": "production",
+  "metadata": {
+    "daily_cost": 125.50,
+    "threshold": 100.00,
+    "cost_percentage": 125.5,
+    "period": "2025-11-13"
+  }
+}

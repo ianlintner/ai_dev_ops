@@ -1,0 +1,254 @@
+{
+  "dashboard": {
+    "title": "AI Model Performance Dashboard",
+    "tags": ["ai", "ml", "inference", "monitoring"],
+    "timezone": "browser",
+    "schemaVersion": 16,
+    "version": 1,
+    "refresh": "30s",
+    "panels": [
+      {
+        "id": 1,
+        "title": "Inference Requests per Second",
+        "type": "graph",
+        "gridPos": {
+          "x": 0,
+          "y": 0,
+          "w": 12,
+          "h": 8
+        },
+        "targets": [
+          {
+            "expr": "rate(ai_inference_requests_total[5m])",
+            "legendFormat": "{{model}} - {{status}}",
+            "refId": "A"
+          }
+        ],
+        "yaxes": [
+          {
+            "format": "reqps",
+            "label": "Requests/sec"
+          }
+        ]
+      },
+      {
+        "id": 2,
+        "title": "Average Inference Latency",
+        "type": "graph",
+        "gridPos": {
+          "x": 12,
+          "y": 0,
+          "w": 12,
+          "h": 8
+        },
+        "targets": [
+          {
+            "expr": "rate(ai_inference_latency_seconds_sum[5m]) / rate(ai_inference_latency_seconds_count[5m])",
+            "legendFormat": "{{model}}",
+            "refId": "A"
+          }
+        ],
+        "yaxes": [
+          {
+            "format": "s",
+            "label": "Latency"
+          }
+        ]
+      },
+      {
+        "id": 3,
+        "title": "Token Usage by Model",
+        "type": "graph",
+        "gridPos": {
+          "x": 0,
+          "y": 8,
+          "w": 12,
+          "h": 8
+        },
+        "targets": [
+          {
+            "expr": "rate(ai_tokens_used_total[5m])",
+            "legendFormat": "{{model}} - {{token_type}}",
+            "refId": "A"
+          }
+        ],
+        "yaxes": [
+          {
+            "format": "short",
+            "label": "Tokens/sec"
+          }
+        ]
+      },
+      {
+        "id": 4,
+        "title": "Error Rate",
+        "type": "graph",
+        "gridPos": {
+          "x": 12,
+          "y": 8,
+          "w": 12,
+          "h": 8
+        },
+        "targets": [
+          {
+            "expr": "rate(ai_inference_errors_total[5m])",
+            "legendFormat": "{{model}} - {{error_type}}",
+            "refId": "A"
+          }
+        ],
+        "yaxes": [
+          {
+            "format": "short",
+            "label": "Errors/sec"
+          }
+        ],
+        "alert": {
+          "name": "High Error Rate",
+          "conditions": [
+            {
+              "evaluator": {
+                "params": [0.1],
+                "type": "gt"
+              },
+              "query": {
+                "params": ["A", "5m", "now"]
+              },
+              "type": "query"
+            }
+          ],
+          "executionErrorState": "alerting",
+          "frequency": "1m",
+          "handler": 1,
+          "message": "AI inference error rate is high"
+        }
+      },
+      {
+        "id": 5,
+        "title": "Active Inferences",
+        "type": "stat",
+        "gridPos": {
+          "x": 0,
+          "y": 16,
+          "w": 6,
+          "h": 4
+        },
+        "targets": [
+          {
+            "expr": "sum(ai_active_inferences)",
+            "refId": "A"
+          }
+        ],
+        "options": {
+          "colorMode": "value",
+          "graphMode": "area",
+          "justifyMode": "auto",
+          "orientation": "auto",
+          "reduceOptions": {
+            "values": false,
+            "calcs": ["lastNotNull"]
+          }
+        }
+      },
+      {
+        "id": 6,
+        "title": "Total Cost (Last Hour)",
+        "type": "stat",
+        "gridPos": {
+          "x": 6,
+          "y": 16,
+          "w": 6,
+          "h": 4
+        },
+        "targets": [
+          {
+            "expr": "increase(ai_inference_cost_dollars_total[1h])",
+            "refId": "A"
+          }
+        ],
+        "options": {
+          "colorMode": "value",
+          "unit": "currencyUSD"
+        }
+      },
+      {
+        "id": 7,
+        "title": "P95 Latency by Model",
+        "type": "graph",
+        "gridPos": {
+          "x": 12,
+          "y": 16,
+          "w": 12,
+          "h": 8
+        },
+        "targets": [
+          {
+            "expr": "histogram_quantile(0.95, rate(ai_inference_latency_seconds_bucket[5m]))",
+            "legendFormat": "{{model}}",
+            "refId": "A"
+          }
+        ],
+        "yaxes": [
+          {
+            "format": "s",
+            "label": "P95 Latency"
+          }
+        ]
+      },
+      {
+        "id": 8,
+        "title": "Token Generation Rate",
+        "type": "graph",
+        "gridPos": {
+          "x": 0,
+          "y": 20,
+          "w": 12,
+          "h": 8
+        },
+        "targets": [
+          {
+            "expr": "rate(ai_token_generation_rate_tokens_per_second_sum[5m]) / rate(ai_token_generation_rate_tokens_per_second_count[5m])",
+            "legendFormat": "{{model}}",
+            "refId": "A"
+          }
+        ],
+        "yaxes": [
+          {
+            "format": "short",
+            "label": "Tokens/sec"
+          }
+        ]
+      }
+    ],
+    "templating": {
+      "list": [
+        {
+          "name": "model",
+          "type": "query",
+          "query": "label_values(ai_inference_requests_total, model)",
+          "refresh": 1,
+          "multi": true,
+          "includeAll": true
+        },
+        {
+          "name": "environment",
+          "type": "query",
+          "query": "label_values(ai_inference_requests_total, environment)",
+          "refresh": 1,
+          "multi": false,
+          "includeAll": false
+        }
+      ]
+    },
+    "annotations": {
+      "list": [
+        {
+          "name": "Deployments",
+          "datasource": "-- Grafana --",
+          "enable": true,
+          "iconColor": "green",
+          "tags": ["deployment"]
+        }
+      ]
+    }
+  }
+}
