@@ -157,12 +157,51 @@ See [docs/best-practices.md](./docs/best-practices.md) for detailed guidelines.
 - **Datadog**: Full-stack observability
 - **Python**: Primary language for examples
 
+## 🤖 GitHub Copilot
+
+This repository includes GitHub Copilot instructions in `.github/copilot-instructions.md` to help with:
+- Code style and patterns
+- AI-specific observability conventions
+- Integration best practices
+- Documentation standards
+
 ## 🤝 Contributing
 
-Contributions are welcome! Please:
-1. Fork the repository
-2. Create a feature branch
-3. Submit a pull request with clear description
+Contributions are welcome! Please see [CONTRIBUTING.md](./CONTRIBUTING.md) for detailed guidelines.
+
+### Development Setup
+
+```bash
+# Install development dependencies
+pip install -r requirements-dev.txt
+
+# Install pre-commit hooks
+pip install pre-commit
+pre-commit install
+
+# Run formatting
+make format
+
+# Run linting
+make lint
+
+# Run tests
+make test
+
+# Validate JSON schemas
+make validate
+
+# Run all checks
+make all
+```
+
+### CI/CD
+
+This repository uses GitHub Actions for:
+- **Linting**: Code quality checks with flake8, pylint, black, and isort
+- **Testing**: Validation across Python 3.8, 3.9, 3.10, and 3.11
+- **Security**: Bandit and Safety scans
+- **Documentation**: Markdown link checking
 
 ## 📄 License
 

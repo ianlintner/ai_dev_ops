@@ -1,0 +1,14 @@
+{
+  "ignorePatterns": [
+    {
+      "pattern": "^http://localhost"
+    },
+    {
+      "pattern": "^https://grafana.example.com"
+    },
+    {
+      "pattern": "^https://api.example.com"
+    }
+  ],
+  "aliveStatusCodes": [200, 206, 301, 302, 307, 308, 403, 429]
+}
