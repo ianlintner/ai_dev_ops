@@ -1,0 +1,189 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "title": "Unified Observability Correlation Schema",
+  "description": "Schema for correlating traces, logs, metrics, and events in a unified observability system",
+  "type": "object",
+  "required": ["correlation_id", "timestamp", "telemetry_type", "service_name"],
+  "properties": {
+    "correlation_id": {
+      "type": "string",
+      "description": "Unique identifier that correlates all related telemetry signals",
+      "pattern": "^[a-f0-9]{32}$",
+      "example": "a1b2c3d4e5f6789012345678901234ab"
+    },
+    "trace_id": {
+      "type": "string",
+      "description": "OpenTelemetry trace ID (W3C format)",
+      "pattern": "^[a-f0-9]{32}$",
+      "example": "4bf92f3577b34da6a3ce929d0e0e4736"
+    },
+    "span_id": {
+      "type": "string",
+      "description": "OpenTelemetry span ID",
+      "pattern": "^[a-f0-9]{16}$",
+      "example": "00f067aa0ba902b7"
+    },
+    "parent_span_id": {
+      "type": "string",
+      "description": "Parent span ID for hierarchical tracing",
+      "pattern": "^[a-f0-9]{16}$"
+    },
+    "timestamp": {
+      "type": "string",
+      "format": "date-time",
+      "description": "ISO 8601 timestamp with timezone",
+      "example": "2025-11-13T23:46:07.370Z"
+    },
+    "telemetry_type": {
+      "type": "string",
+      "enum": ["trace", "log", "metric", "event", "alert"],
+      "description": "Type of telemetry signal"
+    },
+    "service_name": {
+      "type": "string",
+      "description": "Name of the service generating the telemetry",
+      "example": "payment-service"
+    },
+    "environment": {
+      "type": "string",
+      "enum": ["production", "staging", "development", "test"],
+      "description": "Deployment environment"
+    },
+    "cluster": {
+      "type": "string",
+      "description": "Kubernetes cluster or deployment region",
+      "example": "us-west-2-prod"
+    },
+    "namespace": {
+      "type": "string",
+      "description": "Kubernetes namespace or logical grouping",
+      "example": "payment-services"
+    },
+    "pod_name": {
+      "type": "string",
+      "description": "Kubernetes pod name",
+      "example": "payment-service-7d5c8bf9c5-xk2mz"
+    },
+    "node_name": {
+      "type": "string",
+      "description": "Kubernetes node or host name",
+      "example": "ip-10-0-1-42.us-west-2.compute.internal"
+    },
+    "request_id": {
+      "type": "string",
+      "description": "HTTP request ID or transaction ID",
+      "example": "req_1234567890abcdef"
+    },
+    "user_id": {
+      "type": "string",
+      "description": "User identifier (hashed for privacy)",
+      "example": "usr_hash_abc123"
+    },
+    "session_id": {
+      "type": "string",
+      "description": "User session identifier",
+      "example": "sess_xyz789"
+    },
+    "tenant_id": {
+      "type": "string",
+      "description": "Multi-tenant identifier",
+      "example": "tenant_acme_corp"
+    },
+    "severity": {
+      "type": "string",
+      "enum": ["debug", "info", "warning", "error", "critical"],
+      "description": "Severity level of the telemetry"
+    },
+    "attributes": {
+      "type": "object",
+      "description": "Additional context-specific attributes",
+      "additionalProperties": true
+    },
+    "related_traces": {
+      "type": "array",
+      "description": "Array of related trace IDs",
+      "items": {
+        "type": "string",
+        "pattern": "^[a-f0-9]{32}$"
+      }
+    },
+    "related_logs": {
+      "type": "array",
+      "description": "Array of related log entry IDs",
+      "items": {
+        "type": "string"
+      }
+    },
+    "related_metrics": {
+      "type": "array",
+      "description": "Array of related metric names",
+      "items": {
+        "type": "string"
+      }
+    },
+    "related_events": {
+      "type": "array",
+      "description": "Array of related event IDs",
+      "items": {
+        "type": "string"
+      }
+    },
+    "tags": {
+      "type": "object",
+      "description": "Key-value tags for categorization and filtering",
+      "additionalProperties": {
+        "type": "string"
+      }
+    },
+    "metadata": {
+      "type": "object",
+      "description": "System metadata",
+      "properties": {
+        "schema_version": {
+          "type": "string",
+          "example": "1.0.0"
+        },
+        "source": {
+          "type": "string",
+          "description": "Source of the telemetry data",
+          "example": "opentelemetry-collector"
+        },
+        "ingestion_time": {
+          "type": "string",
+          "format": "date-time"
+        },
+        "retention_days": {
+          "type": "integer",
+          "minimum": 1
+        }
+      }
+    }
+  },
+  "examples": [
+    {
+      "correlation_id": "a1b2c3d4e5f6789012345678901234ab",
+      "trace_id": "4bf92f3577b34da6a3ce929d0e0e4736",
+      "span_id": "00f067aa0ba902b7",
+      "timestamp": "2025-11-13T23:46:07.370Z",
+      "telemetry_type": "trace",
+      "service_name": "payment-service",
+      "environment": "production",
+      "cluster": "us-west-2-prod",
+      "namespace": "payment-services",
+      "request_id": "req_1234567890abcdef",
+      "user_id": "usr_hash_abc123",
+      "severity": "info",
+      "attributes": {
+        "http.method": "POST",
+        "http.url": "/api/v1/payments",
+        "http.status_code": 200
+      },
+      "related_logs": ["log_abc123", "log_def456"],
+      "related_metrics": ["payment_latency_seconds", "payment_success_total"],
+      "tags": {
+        "team": "payments",
+        "component": "transaction-processor"
+      }
+    }
+  ]
+}
