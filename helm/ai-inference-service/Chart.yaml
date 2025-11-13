@@ -1,0 +1,15 @@
+apiVersion: v2
+name: ai-inference-service
+description: A Helm chart for AI Inference Service with observability
+type: application
+version: 1.0.0
+appVersion: "1.0.0"
+keywords:
+  - ai
+  - inference
+  - observability
+  - opentelemetry
+  - prometheus
+maintainers:
+  - name: AI DevOps Team
+    email: team@example.com

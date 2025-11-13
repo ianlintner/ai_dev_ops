@@ -1,0 +1,150 @@
+# Default values for ai-inference-service.
+
+replicaCount: 3
+
+image:
+  repository: ai-inference
+  pullPolicy: IfNotPresent
+  tag: "latest"
+
+imagePullSecrets: []
+nameOverride: ""
+fullnameOverride: ""
+
+serviceAccount:
+  create: true
+  annotations: {}
+  name: "ai-inference"
+
+podAnnotations:
+  prometheus.io/scrape: "true"
+  prometheus.io/port: "9090"
+  prometheus.io/path: "/metrics"
+
+podSecurityContext:
+  runAsNonRoot: true
+  runAsUser: 1000
+  fsGroup: 1000
+
+securityContext:
+  allowPrivilegeEscalation: false
+  capabilities:
+    drop:
+    - ALL
+  readOnlyRootFilesystem: true
+
+service:
+  type: ClusterIP
+  port: 80
+  targetPort: 8000
+  metricsPort: 9090
+
+ingress:
+  enabled: true
+  className: "nginx"
+  annotations:
+    cert-manager.io/cluster-issuer: letsencrypt-prod
+    nginx.ingress.kubernetes.io/rate-limit: "100"
+    nginx.ingress.kubernetes.io/ssl-redirect: "true"
+  hosts:
+    - host: ai-inference.example.com
+      paths:
+        - path: /
+          pathType: Prefix
+  tls:
+    - secretName: ai-inference-tls
+      hosts:
+        - ai-inference.example.com
+
+resources:
+  limits:
+    cpu: 2000m
+    memory: 4Gi
+  requests:
+    cpu: 1000m
+    memory: 2Gi
+
+autoscaling:
+  enabled: true
+  minReplicas: 3
+  maxReplicas: 20
+  targetCPUUtilizationPercentage: 70
+  targetMemoryUtilizationPercentage: 80
+
+nodeSelector: {}
+
+tolerations: []
+
+affinity:
+  podAntiAffinity:
+    preferredDuringSchedulingIgnoredDuringExecution:
+      - weight: 100
+        podAffinityTerm:
+          labelSelector:
+            matchExpressions:
+              - key: app.kubernetes.io/name
+                operator: In
+                values:
+                  - ai-inference-service
+          topologyKey: kubernetes.io/hostname
+
+livenessProbe:
+  httpGet:
+    path: /health
+    port: http
+  initialDelaySeconds: 30
+  periodSeconds: 10
+  timeoutSeconds: 5
+  failureThreshold: 3
+
+readinessProbe:
+  httpGet:
+    path: /ready
+    port: http
+  initialDelaySeconds: 10
+  periodSeconds: 5
+  timeoutSeconds: 3
+  failureThreshold: 3
+
+env:
+  - name: OTEL_EXPORTER_OTLP_ENDPOINT
+    value: "http://otel-collector:4317"
+  - name: OTEL_SERVICE_NAME
+    value: "ai-inference-service"
+  - name: LOG_LEVEL
+    value: "INFO"
+  - name: PROMETHEUS_PORT
+    value: "9090"
+
+config:
+  server:
+    port: 8000
+    timeout: 30s
+  
+  observability:
+    metrics:
+      enabled: true
+      port: 9090
+    tracing:
+      enabled: true
+      sampleRate: 1.0
+    logging:
+      level: info
+      format: json
+  
+  ai:
+    models:
+      - name: gpt-4
+        provider: openai
+        maxTokens: 4096
+        temperature: 0.7
+    caching:
+      enabled: true
+      ttl: 3600
+    rateLimiting:
+      enabled: true
+      requestsPerMinute: 100
+
+pdb:
+  enabled: true
+  minAvailable: 2
