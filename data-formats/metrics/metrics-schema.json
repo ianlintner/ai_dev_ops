@@ -1,0 +1,82 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "title": "AI Metrics Schema",
+  "description": "Schema for AI model metrics in JSON format",
+  "type": "object",
+  "required": ["timestamp", "metric_name", "value", "model"],
+  "properties": {
+    "timestamp": {
+      "type": "string",
+      "format": "date-time",
+      "description": "ISO 8601 timestamp of when the metric was recorded"
+    },
+    "metric_name": {
+      "type": "string",
+      "description": "Name of the metric",
+      "enum": [
+        "inference_latency",
+        "token_usage",
+        "inference_cost",
+        "error_rate",
+        "throughput",
+        "token_generation_rate"
+      ]
+    },
+    "value": {
+      "type": "number",
+      "description": "Numeric value of the metric"
+    },
+    "unit": {
+      "type": "string",
+      "description": "Unit of measurement",
+      "examples": ["seconds", "tokens", "dollars", "percentage", "requests_per_second"]
+    },
+    "model": {
+      "type": "object",
+      "required": ["name"],
+      "properties": {
+        "name": {
+          "type": "string",
+          "description": "Model name",
+          "examples": ["gpt-4", "claude-2", "llama-2"]
+        },
+        "version": {
+          "type": "string",
+          "description": "Model version"
+        },
+        "provider": {
+          "type": "string",
+          "description": "Model provider",
+          "examples": ["openai", "anthropic", "azure"]
+        }
+      }
+    },
+    "environment": {
+      "type": "string",
+      "description": "Deployment environment",
+      "enum": ["development", "staging", "production"]
+    },
+    "labels": {
+      "type": "object",
+      "description": "Additional labels for metric categorization",
+      "additionalProperties": {
+        "type": "string"
+      }
+    },
+    "metadata": {
+      "type": "object",
+      "description": "Additional contextual information",
+      "properties": {
+        "request_id": {
+          "type": "string"
+        },
+        "user_id": {
+          "type": "string"
+        },
+        "session_id": {
+          "type": "string"
+        }
+      }
+    }
+  }
+}

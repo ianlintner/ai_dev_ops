@@ -1,0 +1,142 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "title": "OpenTelemetry Trace Schema",
+  "description": "Schema for distributed tracing of AI operations",
+  "type": "object",
+  "required": ["trace_id", "span_id", "name", "start_time", "end_time"],
+  "properties": {
+    "trace_id": {
+      "type": "string",
+      "pattern": "^[0-9a-f]{32}$",
+      "description": "Unique trace identifier (16 bytes hex)"
+    },
+    "span_id": {
+      "type": "string",
+      "pattern": "^[0-9a-f]{16}$",
+      "description": "Unique span identifier (8 bytes hex)"
+    },
+    "parent_span_id": {
+      "type": "string",
+      "pattern": "^[0-9a-f]{16}$",
+      "description": "Parent span identifier"
+    },
+    "name": {
+      "type": "string",
+      "description": "Span operation name"
+    },
+    "kind": {
+      "type": "string",
+      "enum": ["INTERNAL", "SERVER", "CLIENT", "PRODUCER", "CONSUMER"],
+      "description": "Span kind"
+    },
+    "start_time": {
+      "type": "string",
+      "format": "date-time",
+      "description": "Span start time in ISO 8601 format"
+    },
+    "end_time": {
+      "type": "string",
+      "format": "date-time",
+      "description": "Span end time in ISO 8601 format"
+    },
+    "status": {
+      "type": "object",
+      "properties": {
+        "code": {
+          "type": "string",
+          "enum": ["OK", "ERROR", "UNSET"]
+        },
+        "message": {
+          "type": "string"
+        }
+      }
+    },
+    "attributes": {
+      "type": "object",
+      "description": "Span attributes",
+      "properties": {
+        "service.name": {
+          "type": "string"
+        },
+        "ai.model.name": {
+          "type": "string"
+        },
+        "ai.model.version": {
+          "type": "string"
+        },
+        "ai.inference.latency_ms": {
+          "type": "number"
+        },
+        "ai.tokens.input": {
+          "type": "integer"
+        },
+        "ai.tokens.output": {
+          "type": "integer"
+        },
+        "ai.cost": {
+          "type": "number"
+        },
+        "http.method": {
+          "type": "string"
+        },
+        "http.status_code": {
+          "type": "integer"
+        }
+      },
+      "additionalProperties": true
+    },
+    "events": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": ["name", "timestamp"],
+        "properties": {
+          "name": {
+            "type": "string"
+          },
+          "timestamp": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "attributes": {
+            "type": "object"
+          }
+        }
+      }
+    },
+    "links": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": ["trace_id", "span_id"],
+        "properties": {
+          "trace_id": {
+            "type": "string"
+          },
+          "span_id": {
+            "type": "string"
+          },
+          "attributes": {
+            "type": "object"
+          }
+        }
+      }
+    },
+    "resource": {
+      "type": "object",
+      "description": "Resource attributes",
+      "properties": {
+        "service.name": {
+          "type": "string"
+        },
+        "service.version": {
+          "type": "string"
+        },
+        "deployment.environment": {
+          "type": "string"
+        }
+      },
+      "additionalProperties": true
+    }
+  }
+}
