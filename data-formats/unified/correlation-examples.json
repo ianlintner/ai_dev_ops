@@ -1,0 +1,350 @@
+[
+  {
+    "description": "Successful payment transaction with full correlation",
+    "scenario": "Happy path - user completes payment successfully",
+    "correlation_data": [
+      {
+        "correlation_id": "c1a2b3d4e5f6789012345678901234ab",
+        "trace_id": "4bf92f3577b34da6a3ce929d0e0e4736",
+        "span_id": "00f067aa0ba902b7",
+        "timestamp": "2025-11-13T23:46:07.370Z",
+        "telemetry_type": "trace",
+        "service_name": "api-gateway",
+        "environment": "production",
+        "cluster": "us-west-2-prod",
+        "namespace": "frontend",
+        "request_id": "req_pay_123456",
+        "user_id": "usr_hash_abc123",
+        "session_id": "sess_xyz789",
+        "severity": "info",
+        "attributes": {
+          "http.method": "POST",
+          "http.url": "/api/v1/payments",
+          "http.status_code": 200,
+          "http.user_agent": "Mozilla/5.0"
+        },
+        "related_logs": ["log_gw_001", "log_gw_002"],
+        "related_metrics": ["api_gateway_latency_seconds", "api_gateway_requests_total"],
+        "tags": {
+          "team": "platform",
+          "component": "gateway"
+        }
+      },
+      {
+        "correlation_id": "c1a2b3d4e5f6789012345678901234ab",
+        "trace_id": "4bf92f3577b34da6a3ce929d0e0e4736",
+        "span_id": "5a6b7c8d9e0f1234",
+        "parent_span_id": "00f067aa0ba902b7",
+        "timestamp": "2025-11-13T23:46:07.450Z",
+        "telemetry_type": "log",
+        "service_name": "payment-service",
+        "environment": "production",
+        "cluster": "us-west-2-prod",
+        "namespace": "payment-services",
+        "request_id": "req_pay_123456",
+        "user_id": "usr_hash_abc123",
+        "severity": "info",
+        "attributes": {
+          "message": "Processing payment for amount: $99.99",
+          "amount": 99.99,
+          "currency": "USD",
+          "payment_method": "credit_card"
+        },
+        "related_traces": ["4bf92f3577b34da6a3ce929d0e0e4736"],
+        "related_metrics": ["payment_processing_seconds", "payment_amount_dollars"],
+        "tags": {
+          "team": "payments",
+          "component": "processor"
+        }
+      },
+      {
+        "correlation_id": "c1a2b3d4e5f6789012345678901234ab",
+        "trace_id": "4bf92f3577b34da6a3ce929d0e0e4736",
+        "span_id": "a1b2c3d4e5f61234",
+        "parent_span_id": "5a6b7c8d9e0f1234",
+        "timestamp": "2025-11-13T23:46:07.520Z",
+        "telemetry_type": "log",
+        "service_name": "fraud-detection",
+        "environment": "production",
+        "cluster": "us-west-2-prod",
+        "namespace": "payment-services",
+        "request_id": "req_pay_123456",
+        "user_id": "usr_hash_abc123",
+        "severity": "info",
+        "attributes": {
+          "message": "Fraud check passed",
+          "risk_score": 0.12,
+          "fraud_indicators": []
+        },
+        "related_traces": ["4bf92f3577b34da6a3ce929d0e0e4736"],
+        "tags": {
+          "team": "payments",
+          "component": "fraud-detection"
+        }
+      },
+      {
+        "correlation_id": "c1a2b3d4e5f6789012345678901234ab",
+        "timestamp": "2025-11-13T23:46:07.550Z",
+        "telemetry_type": "metric",
+        "service_name": "payment-service",
+        "environment": "production",
+        "request_id": "req_pay_123456",
+        "severity": "info",
+        "attributes": {
+          "metric_name": "payment_success_total",
+          "metric_type": "counter",
+          "value": 1,
+          "labels": {
+            "method": "credit_card",
+            "currency": "USD"
+          }
+        },
+        "related_traces": ["4bf92f3577b34da6a3ce929d0e0e4736"],
+        "related_logs": ["log_gw_002"],
+        "tags": {
+          "team": "payments"
+        }
+      }
+    ]
+  },
+  {
+    "description": "Payment failure due to downstream service timeout",
+    "scenario": "Error path - auth service timeout causes payment failure",
+    "correlation_data": [
+      {
+        "correlation_id": "e1f2a3b4c5d6789012345678901234cd",
+        "trace_id": "7ef82c4588a35db7b4da939e1f1f5847",
+        "span_id": "11a178bb1ca903c8",
+        "timestamp": "2025-11-13T23:47:15.100Z",
+        "telemetry_type": "trace",
+        "service_name": "api-gateway",
+        "environment": "production",
+        "cluster": "us-west-2-prod",
+        "namespace": "frontend",
+        "request_id": "req_pay_789012",
+        "user_id": "usr_hash_def456",
+        "severity": "error",
+        "attributes": {
+          "http.method": "POST",
+          "http.url": "/api/v1/payments",
+          "http.status_code": 504,
+          "error.type": "timeout"
+        },
+        "related_logs": ["log_err_001", "log_err_002", "log_err_003"],
+        "related_metrics": ["api_gateway_errors_total", "api_gateway_latency_seconds"],
+        "tags": {
+          "team": "platform",
+          "component": "gateway",
+          "incident": "INC-2025-1113-001"
+        }
+      },
+      {
+        "correlation_id": "e1f2a3b4c5d6789012345678901234cd",
+        "trace_id": "7ef82c4588a35db7b4da939e1f1f5847",
+        "span_id": "6b8c9d0e1f234567",
+        "parent_span_id": "11a178bb1ca903c8",
+        "timestamp": "2025-11-13T23:47:15.200Z",
+        "telemetry_type": "log",
+        "service_name": "payment-service",
+        "environment": "production",
+        "cluster": "us-west-2-prod",
+        "namespace": "payment-services",
+        "request_id": "req_pay_789012",
+        "user_id": "usr_hash_def456",
+        "severity": "error",
+        "attributes": {
+          "message": "Payment processing failed: auth service timeout",
+          "error": "TimeoutError: Connection to auth-service timed out after 5000ms",
+          "amount": 149.99,
+          "currency": "USD"
+        },
+        "related_traces": ["7ef82c4588a35db7b4da939e1f1f5847"],
+        "related_events": ["event_timeout_001"],
+        "tags": {
+          "team": "payments",
+          "component": "processor",
+          "error_type": "timeout",
+          "incident": "INC-2025-1113-001"
+        }
+      },
+      {
+        "correlation_id": "e1f2a3b4c5d6789012345678901234cd",
+        "trace_id": "7ef82c4588a35db7b4da939e1f1f5847",
+        "span_id": "c2d3e4f5a6b78901",
+        "parent_span_id": "6b8c9d0e1f234567",
+        "timestamp": "2025-11-13T23:47:20.200Z",
+        "telemetry_type": "log",
+        "service_name": "auth-service",
+        "environment": "production",
+        "cluster": "us-west-2-prod",
+        "namespace": "auth-services",
+        "request_id": "req_pay_789012",
+        "severity": "critical",
+        "attributes": {
+          "message": "Database connection pool exhausted",
+          "error": "PoolExhaustedError: All 50 connections in use",
+          "pool_size": 50,
+          "active_connections": 50,
+          "waiting_requests": 127
+        },
+        "related_traces": ["7ef82c4588a35db7b4da939e1f1f5847"],
+        "related_metrics": ["auth_db_connections_active", "auth_db_pool_wait_time"],
+        "related_events": ["event_pool_exhausted_001"],
+        "tags": {
+          "team": "auth",
+          "component": "database",
+          "error_type": "connection_pool",
+          "incident": "INC-2025-1113-001"
+        }
+      },
+      {
+        "correlation_id": "e1f2a3b4c5d6789012345678901234cd",
+        "timestamp": "2025-11-13T23:47:20.250Z",
+        "telemetry_type": "metric",
+        "service_name": "auth-service",
+        "environment": "production",
+        "cluster": "us-west-2-prod",
+        "severity": "critical",
+        "attributes": {
+          "metric_name": "auth_db_connections_active",
+          "metric_type": "gauge",
+          "value": 50,
+          "threshold": 50,
+          "labels": {
+            "pool": "postgres-main",
+            "database": "auth"
+          }
+        },
+        "related_traces": ["7ef82c4588a35db7b4da939e1f1f5847"],
+        "related_logs": ["log_err_003"],
+        "related_events": ["event_pool_exhausted_001"],
+        "tags": {
+          "team": "auth",
+          "alert": "DatabaseConnectionPoolExhausted",
+          "incident": "INC-2025-1113-001"
+        }
+      },
+      {
+        "correlation_id": "e1f2a3b4c5d6789012345678901234cd",
+        "timestamp": "2025-11-13T23:47:20.300Z",
+        "telemetry_type": "alert",
+        "service_name": "auth-service",
+        "environment": "production",
+        "cluster": "us-west-2-prod",
+        "severity": "critical",
+        "attributes": {
+          "alert_name": "DatabaseConnectionPoolExhausted",
+          "alert_state": "firing",
+          "description": "Auth service database connection pool is at capacity",
+          "runbook_url": "https://wiki.example.com/runbooks/db-pool-exhaustion"
+        },
+        "related_traces": ["7ef82c4588a35db7b4da939e1f1f5847"],
+        "related_logs": ["log_err_003"],
+        "related_metrics": ["auth_db_connections_active"],
+        "tags": {
+          "team": "auth",
+          "severity": "critical",
+          "incident": "INC-2025-1113-001"
+        }
+      }
+    ]
+  },
+  {
+    "description": "Multi-region performance degradation",
+    "scenario": "P99 latency spike across multiple regions due to upstream CDN issue",
+    "correlation_data": [
+      {
+        "correlation_id": "f2a3b4c5d6e789012345678901234de",
+        "trace_id": "8fa93d5699b46ec8c5eb048f2g2g6958",
+        "span_id": "22b289cc2db014d9",
+        "timestamp": "2025-11-13T23:48:00.000Z",
+        "telemetry_type": "trace",
+        "service_name": "api-gateway",
+        "environment": "production",
+        "cluster": "us-east-1-prod",
+        "namespace": "frontend",
+        "severity": "warning",
+        "attributes": {
+          "http.method": "GET",
+          "http.url": "/api/v1/products/search",
+          "http.status_code": 200,
+          "duration_ms": 2847
+        },
+        "related_metrics": ["api_gateway_latency_seconds", "cdn_latency_seconds"],
+        "tags": {
+          "team": "platform",
+          "performance_issue": "true"
+        }
+      },
+      {
+        "correlation_id": "f2a3b4c5d6e789012345678901234de",
+        "trace_id": "9gb04e6700c57fd9d6fc159g3h3h7069",
+        "span_id": "33c390dd3ec125ea",
+        "timestamp": "2025-11-13T23:48:00.100Z",
+        "telemetry_type": "trace",
+        "service_name": "api-gateway",
+        "environment": "production",
+        "cluster": "eu-west-1-prod",
+        "namespace": "frontend",
+        "severity": "warning",
+        "attributes": {
+          "http.method": "GET",
+          "http.url": "/api/v1/products/search",
+          "http.status_code": 200,
+          "duration_ms": 2951
+        },
+        "related_metrics": ["api_gateway_latency_seconds", "cdn_latency_seconds"],
+        "tags": {
+          "team": "platform",
+          "performance_issue": "true"
+        }
+      },
+      {
+        "correlation_id": "f2a3b4c5d6e789012345678901234de",
+        "timestamp": "2025-11-13T23:48:00.500Z",
+        "telemetry_type": "metric",
+        "service_name": "cdn-metrics",
+        "environment": "production",
+        "cluster": "global",
+        "severity": "warning",
+        "attributes": {
+          "metric_name": "cdn_origin_latency_seconds",
+          "metric_type": "histogram",
+          "p50": 0.45,
+          "p95": 2.1,
+          "p99": 3.2,
+          "labels": {
+            "origin": "aws-cloudfront",
+            "pop": "multiple"
+          }
+        },
+        "related_traces": ["8fa93d5699b46ec8c5eb048f2g2g6958", "9gb04e6700c57fd9d6fc159g3h3h7069"],
+        "related_events": ["event_cdn_degradation_001"],
+        "tags": {
+          "team": "infrastructure",
+          "third_party": "cloudfront"
+        }
+      },
+      {
+        "correlation_id": "f2a3b4c5d6e789012345678901234de",
+        "timestamp": "2025-11-13T23:48:01.000Z",
+        "telemetry_type": "event",
+        "service_name": "monitoring",
+        "environment": "production",
+        "severity": "warning",
+        "attributes": {
+          "event_type": "third_party_degradation",
+          "provider": "aws_cloudfront",
+          "impact": "Increased latency across all regions",
+          "status_page_url": "https://status.aws.amazon.com/"
+        },
+        "related_metrics": ["cdn_origin_latency_seconds"],
+        "related_traces": ["8fa93d5699b46ec8c5eb048f2g2g6958", "9gb04e6700c57fd9d6fc159g3h3h7069"],
+        "tags": {
+          "team": "infrastructure",
+          "external_dependency": "true"
+        }
+      }
+    ]
+  }
+]
