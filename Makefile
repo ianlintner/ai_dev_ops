@@ -41,16 +41,25 @@ test:
 	python -m py_compile examples/opentelemetry/advanced_agent_tracing.py
 	python -m py_compile examples/prometheus/ai_metrics.py
 	python -m py_compile examples/azure/azure_monitor_example.py
+	python -m py_compile examples/unified-correlation/correlation_framework.py
+	python -m py_compile examples/multi-agent/agents/investigation_system.py
+	python -m py_compile mcp-server/tools.py
 	@echo "Running OpenTelemetry example..."
 	timeout 5 python examples/opentelemetry/basic_instrumentation.py || exit 0
 	@echo "Testing Prometheus example starts..."
 	timeout 3 python examples/prometheus/ai_metrics.py || exit 0
+	@echo "Testing correlation framework..."
+	python -m py_compile examples/unified-correlation/correlation_framework.py
+	@echo "Testing multi-agent system..."
+	timeout 10 python examples/multi-agent/agents/investigation_system.py || exit 0
 
 validate:
 	@echo "Validating JSON schemas..."
 	python -c "import json; json.load(open('data-formats/metrics/metrics-schema.json')); print('✓ metrics-schema.json')"
 	python -c "import json; json.load(open('data-formats/logs/log-schema.json')); print('✓ log-schema.json')"
 	python -c "import json; json.load(open('data-formats/traces/trace-schema.json')); print('✓ trace-schema.json')"
+	python -c "import json; json.load(open('data-formats/unified/correlation-schema.json')); print('✓ correlation-schema.json')"
+	python -c "import json; json.load(open('data-formats/unified/correlation-examples.json')); print('✓ correlation-examples.json')"
 	python -c "import json; json.load(open('integrations/grafana/ai-metrics-dashboard.json')); print('✓ ai-metrics-dashboard.json')"
 	@echo "All JSON files validated successfully!"
 
