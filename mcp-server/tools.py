@@ -53,7 +53,7 @@ class TimeRange:
         return cls(start=now - timedelta(hours=1), end=now)
 
 
-class SearchLogsToolparameters
+class SearchLogsTool:
     """
     Tool for searching log entries.
     
