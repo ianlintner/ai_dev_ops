@@ -10,9 +10,8 @@ from collections import defaultdict
 from datetime import datetime, timedelta
 from typing import Any, Dict, List, Optional, Tuple
 
-from opentelemetry import trace
-
 from ai_scaling_engine import AIScalingEngine, ScalingMetrics
+from opentelemetry import trace
 
 tracer = trace.get_tracer(__name__)
 
@@ -239,9 +238,7 @@ class ScheduleGenerator:
             # Identify opportunities for scaling down during low traffic
             for hour_info in patterns["low_traffic_hours"]:
                 hour = hour_info["hour"]
-                schedule.add_entry(
-                    f"{hour:02d}:00", min_pods, f"Scale down during low traffic", confidence=0.95
-                )
+                schedule.add_entry(f"{hour:02d}:00", min_pods, f"Scale down during low traffic", confidence=0.95)
 
             span.set_attribute("schedule_entries", len(schedule.schedule_entries))
 
@@ -308,9 +305,7 @@ class ScheduleGenerator:
         peak_hours = []
         for hour, metrics in hourly_averages.items():
             if metrics["cpu"] > avg_cpu * 1.5 or metrics["rps"] > avg_rps * 1.5:
-                peak_hours.append(
-                    {"hour": hour, "cpu": metrics["cpu"], "rps": metrics["rps"], "severity": "high"}
-                )
+                peak_hours.append({"hour": hour, "cpu": metrics["cpu"], "rps": metrics["rps"], "severity": "high"})
 
         return sorted(peak_hours, key=lambda x: x["cpu"], reverse=True)
 
@@ -350,9 +345,10 @@ def main():
     # Load test data
     print("\nLoading test metrics data...")
     from pathlib import Path
+
     script_dir = Path(__file__).parent
     test_data_path = script_dir / "test_data" / "metrics_dataset.json"
-    
+
     with open(test_data_path, "r") as f:
         test_data = json.load(f)
 

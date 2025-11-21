@@ -27,7 +27,7 @@ def load_test_scenario(scenario_name: str) -> dict:
     # Get the directory of this script
     script_dir = Path(__file__).parent
     test_data_path = script_dir / "test_data" / "metrics_dataset.json"
-    
+
     with open(test_data_path, "r") as f:
         data = json.load(f)
 
@@ -95,9 +95,7 @@ def demo_hpa_management():
     manager = K8sHPAManager(dry_run=True)
 
     # Create initial HPA configuration
-    hpa_config = HPAConfiguration(
-        name="ai-inference-hpa", namespace="ai-services", min_replicas=3, max_replicas=20
-    )
+    hpa_config = HPAConfiguration(name="ai-inference-hpa", namespace="ai-services", min_replicas=3, max_replicas=20)
 
     print("\nInitial HPA Configuration:")
     print(json.dumps(hpa_config.to_dict(), indent=2))

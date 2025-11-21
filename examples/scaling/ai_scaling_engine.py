@@ -163,7 +163,9 @@ class AIScalingEngine:
                 span.set_attribute("confidence", decision.confidence)
 
                 # Track decision metrics
-                confidence_level = "high" if decision.confidence > 0.8 else "medium" if decision.confidence > 0.5 else "low"
+                confidence_level = (
+                    "high" if decision.confidence > 0.8 else "medium" if decision.confidence > 0.5 else "low"
+                )
                 scaling_decisions_total.labels(decision_type=decision.action, confidence_level=confidence_level).inc()
 
                 return decision
@@ -328,7 +330,9 @@ Respond with ONLY the JSON object, no additional text."""
             # Add recent history
             context_parts.append("\nRECENT HISTORY (last 5 data points):")
             for i, m in enumerate(historical_metrics[-5:]):
-                context_parts.append(f"  {i + 1}. CPU: {m.cpu_utilization}%, Memory: {m.memory_utilization}%, RPS: {m.request_rate}")
+                context_parts.append(
+                    f"  {i + 1}. CPU: {m.cpu_utilization}%, Memory: {m.memory_utilization}%, RPS: {m.request_rate}"
+                )
 
         return "\n".join(context_parts) if context_parts else ""
 

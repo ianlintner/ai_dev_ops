@@ -11,9 +11,8 @@ import subprocess
 from datetime import datetime
 from typing import Any, Dict, List, Optional
 
-from opentelemetry import trace
-
 from ai_scaling_engine import AIScalingEngine, ScalingDecision, ScalingMetrics
+from opentelemetry import trace
 
 tracer = trace.get_tracer(__name__)
 
@@ -121,7 +120,10 @@ class K8sHPAManager:
         self.applied_changes: List[Dict[str, Any]] = []
 
     def update_hpa_from_metrics(
-        self, hpa_config: HPAConfiguration, current_metrics: ScalingMetrics, historical_metrics: Optional[List[ScalingMetrics]] = None
+        self,
+        hpa_config: HPAConfiguration,
+        current_metrics: ScalingMetrics,
+        historical_metrics: Optional[List[ScalingMetrics]] = None,
     ) -> Dict[str, Any]:
         """
         Analyze metrics and update HPA configuration accordingly.
@@ -245,9 +247,7 @@ class K8sHPAManager:
                 f.write(yaml_content)
 
             # Apply using kubectl
-            result = subprocess.run(
-                ["kubectl", "apply", "-f", temp_file], capture_output=True, text=True, timeout=30
-            )
+            result = subprocess.run(["kubectl", "apply", "-f", temp_file], capture_output=True, text=True, timeout=30)
 
             # Clean up temp file
             os.remove(temp_file)
@@ -271,7 +271,10 @@ class K8sHPAManager:
         """
         try:
             result = subprocess.run(
-                ["kubectl", "get", "hpa", name, "-n", namespace, "-o", "json"], capture_output=True, text=True, timeout=30
+                ["kubectl", "get", "hpa", name, "-n", namespace, "-o", "json"],
+                capture_output=True,
+                text=True,
+                timeout=30,
             )
 
             if result.returncode != 0:
@@ -401,9 +404,7 @@ def main():
     )
 
     # Reset HPA config
-    hpa_config = HPAConfiguration(
-        name="ai-inference-hpa", namespace="ai-services", min_replicas=5, max_replicas=20
-    )
+    hpa_config = HPAConfiguration(name="ai-inference-hpa", namespace="ai-services", min_replicas=5, max_replicas=20)
 
     update_result = manager.update_hpa_from_metrics(hpa_config, low_load_metrics)
     print(json.dumps(update_result, indent=2))
