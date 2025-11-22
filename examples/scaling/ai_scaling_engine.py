@@ -7,11 +7,12 @@ scaling decisions for Kubernetes deployments.
 
 import json
 import os
-from datetime import datetime, timedelta
+from datetime import datetime
 from typing import Any, Dict, List, Optional
 
 from anthropic import Anthropic
 from opentelemetry import trace
+from opentelemetry.trace import Status, StatusCode
 from prometheus_client import Counter, Histogram
 
 # Define metrics for the scaling engine itself
@@ -231,11 +232,12 @@ class AIScalingEngine:
         Returns:
             AI-generated ScalingDecision
         """
-        # Prepare context for the AI
-        context = self._prepare_ai_context(current_metrics, historical_metrics)
+        with tracer.start_as_current_span("ai_analysis") as span:
+            # Prepare context for the AI
+            context = self._prepare_ai_context(current_metrics, historical_metrics)
 
-        # Create the prompt
-        prompt = f"""You are an expert DevOps engineer specializing in Kubernetes autoscaling and resource optimization.
+            # Create the prompt
+            prompt = f"""You are an expert DevOps engineer specializing in Kubernetes autoscaling and resource optimization.
 
 Analyze the following metrics and provide a scaling recommendation:
 
@@ -266,39 +268,49 @@ Consider:
 
 Respond with ONLY the JSON object, no additional text."""
 
-        try:
-            # Call the AI model
-            response = self.client.messages.create(
-                model=self.model, max_tokens=1024, messages=[{"role": "user", "content": prompt}]
-            )
+            try:
+                # Call the AI model
+                response = self.client.messages.create(
+                    model=self.model, max_tokens=1024, messages=[{"role": "user", "content": prompt}]
+                )
 
-            # Parse the AI response
-            response_text = response.content[0].text.strip()
+                # Track token usage
+                span.set_attribute("ai.tokens.input", response.usage.input_tokens)
+                span.set_attribute("ai.tokens.output", response.usage.output_tokens)
+                span.set_attribute("ai.model.name", self.model)
+                span.set_attribute("ai.model.provider", "anthropic")
 
-            # Remove markdown code blocks if present
-            if response_text.startswith("```"):
-                response_text = response_text.split("```")[1]
-                if response_text.startswith("json"):
-                    response_text = response_text[4:]
-                response_text = response_text.strip()
+                # Parse the AI response
+                response_text = response.content[0].text.strip()
 
-            decision_data = json.loads(response_text)
+                # Remove markdown code blocks if present
+                if response_text.startswith("```"):
+                    response_text = response_text.split("```")[1]
+                    if response_text.startswith("json"):
+                        response_text = response_text[4:]
+                    response_text = response_text.strip()
 
-            return ScalingDecision(
-                action=decision_data.get("action", "maintain"),
-                recommended_pod_count=decision_data.get("recommended_pod_count"),
-                recommended_memory_increase=decision_data.get("recommended_memory_increase"),
-                recommended_cpu_increase=decision_data.get("recommended_cpu_increase"),
-                confidence=decision_data.get("confidence", 0.0),
-                reasoning=decision_data.get("reasoning", ""),
-                urgency=decision_data.get("urgency", "normal"),
-                estimated_cost_impact=decision_data.get("estimated_cost_impact"),
-            )
+                decision_data = json.loads(response_text)
 
-        except Exception as e:
-            # Fallback to rule-based on error
-            print(f"AI analysis failed: {e}. Falling back to rule-based decision.")
-            return self._rule_based_decision(current_metrics)
+                return ScalingDecision(
+                    action=decision_data.get("action", "maintain"),
+                    recommended_pod_count=decision_data.get("recommended_pod_count"),
+                    recommended_memory_increase=decision_data.get("recommended_memory_increase"),
+                    recommended_cpu_increase=decision_data.get("recommended_cpu_increase"),
+                    confidence=decision_data.get("confidence", 0.0),
+                    reasoning=decision_data.get("reasoning", ""),
+                    urgency=decision_data.get("urgency", "normal"),
+                    estimated_cost_impact=decision_data.get("estimated_cost_impact"),
+                )
+
+            except Exception as e:
+                # Record exception in span
+                span.record_exception(e)
+                span.set_status(Status(StatusCode.ERROR, str(e)))
+
+                # Fallback to rule-based on error
+                print(f"AI analysis failed: {e}. Falling back to rule-based decision.")
+                return self._rule_based_decision(current_metrics)
 
     def _prepare_ai_context(
         self, current_metrics: ScalingMetrics, historical_metrics: Optional[List[ScalingMetrics]] = None
@@ -352,6 +364,12 @@ Respond with ONLY the JSON object, no additional text."""
         # Simple trend calculation
         recent_avg = sum(values[-3:]) / min(3, len(values[-3:]))
         overall_avg = sum(values) / len(values)
+
+        # Prevent division by zero
+        if overall_avg == 0:
+            if recent_avg > 0:
+                return "increasing (from zero baseline)"
+            return "stable (zero baseline)"
 
         diff_percent = ((recent_avg - overall_avg) / overall_avg) * 100
 

@@ -56,9 +56,12 @@ class ScalingSchedule:
             "schedule_entries": sorted(self.schedule_entries, key=lambda x: x["time"]),
         }
 
-    def to_cron_jobs(self) -> List[Dict[str, str]]:
+    def to_cron_jobs(self, deployment_name: str = "ai-inference-service") -> List[Dict[str, str]]:
         """
         Generate Kubernetes CronJob specifications for this schedule.
+
+        Args:
+            deployment_name: Name of the Kubernetes deployment to scale
 
         Returns:
             List of CronJob configurations
@@ -66,26 +69,37 @@ class ScalingSchedule:
         cron_jobs = []
 
         for entry in self.schedule_entries:
-            hour, minute = entry["time"].split(":")
+            try:
+                time_parts = entry["time"].split(":")
+                if len(time_parts) != 2:
+                    raise ValueError(f"Invalid time format: {entry['time']}")
 
-            # Basic cron expression (minute hour * * *)
-            cron_expr = f"{minute} {hour} * * *"
+                hour, minute = time_parts
+                # Validate ranges
+                if not (0 <= int(hour) <= 23 and 0 <= int(minute) <= 59):
+                    raise ValueError(f"Time out of range: {entry['time']}")
 
-            # Adjust for day of week if specified
-            if "day_of_week" in entry:
-                if entry["day_of_week"].lower() == "weekend":
-                    cron_expr = f"{minute} {hour} * * 0,6"  # Sunday and Saturday
-                elif entry["day_of_week"].lower() == "weekday":
-                    cron_expr = f"{minute} {hour} * * 1-5"  # Monday to Friday
+                # Basic cron expression (minute hour * * *)
+                cron_expr = f"{minute} {hour} * * *"
 
-            cron_jobs.append(
-                {
-                    "schedule": cron_expr,
-                    "target_pods": entry["target_pods"],
-                    "reason": entry["reason"],
-                    "kubectl_command": f"kubectl scale deployment ai-inference-service --replicas={entry['target_pods']}",
-                }
-            )
+                # Adjust for day of week if specified
+                if "day_of_week" in entry:
+                    if entry["day_of_week"].lower() == "weekend":
+                        cron_expr = f"{minute} {hour} * * 0,6"  # Sunday and Saturday
+                    elif entry["day_of_week"].lower() == "weekday":
+                        cron_expr = f"{minute} {hour} * * 1-5"  # Monday to Friday
+
+                cron_jobs.append(
+                    {
+                        "schedule": cron_expr,
+                        "target_pods": entry["target_pods"],
+                        "reason": entry["reason"],
+                        "kubectl_command": f"kubectl scale deployment {deployment_name} --replicas={entry['target_pods']}",
+                    }
+                )
+            except (ValueError, KeyError) as e:
+                print(f"Warning: Skipping invalid schedule entry: {e}")
+                continue
 
         return cron_jobs
 
@@ -354,6 +368,8 @@ def main():
 
     # Find the daily pattern scenario
     daily_pattern = None
+    schedule = None  # Initialize schedule to avoid NameError
+
     for scenario in test_data["scenarios"]:
         if scenario["scenario"] == "daily_peak_pattern":
             daily_pattern = scenario
@@ -430,7 +446,10 @@ def main():
         print("Daily pattern scenario not found in test data")
 
     print("\n" + "=" * 70)
-    print(f"Total schedule entries generated: {len(schedule.schedule_entries)}")
+    if schedule:
+        print(f"Total schedule entries generated: {len(schedule.schedule_entries)}")
+    else:
+        print("No schedule generated")
 
 
 if __name__ == "__main__":

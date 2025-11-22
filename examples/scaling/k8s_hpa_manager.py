@@ -8,9 +8,11 @@ using AI-driven scaling decisions.
 import json
 import os
 import subprocess
+import tempfile
 from datetime import datetime
 from typing import Any, Dict, List, Optional
 
+import yaml
 from ai_scaling_engine import AIScalingEngine, ScalingDecision, ScalingMetrics
 from opentelemetry import trace
 
@@ -29,6 +31,15 @@ class HPAConfiguration:
         target_cpu_utilization: int = 70,
         target_memory_utilization: int = 80,
     ):
+        if min_replicas < 1:
+            raise ValueError("min_replicas must be at least 1")
+        if max_replicas < min_replicas:
+            raise ValueError("max_replicas must be >= min_replicas")
+        if not 1 <= target_cpu_utilization <= 100:
+            raise ValueError("target_cpu_utilization must be between 1 and 100")
+        if not 1 <= target_memory_utilization <= 100:
+            raise ValueError("target_memory_utilization must be between 1 and 100")
+
         self.name = name
         self.namespace = namespace
         self.min_replicas = min_replicas
@@ -49,54 +60,58 @@ class HPAConfiguration:
 
     def to_yaml(self) -> str:
         """Generate Kubernetes YAML for this HPA configuration."""
-        yaml_template = f"""apiVersion: autoscaling/v2
-kind: HorizontalPodAutoscaler
-metadata:
-  name: {self.name}
-  namespace: {self.namespace}
-spec:
-  scaleTargetRef:
-    apiVersion: apps/v1
-    kind: Deployment
-    name: {self.name.replace('-hpa', '')}
-  minReplicas: {self.min_replicas}
-  maxReplicas: {self.max_replicas}
-  metrics:
-  - type: Resource
-    resource:
-      name: cpu
-      target:
-        type: Utilization
-        averageUtilization: {self.target_cpu_utilization}
-  - type: Resource
-    resource:
-      name: memory
-      target:
-        type: Utilization
-        averageUtilization: {self.target_memory_utilization}
-  behavior:
-    scaleDown:
-      stabilizationWindowSeconds: 300
-      policies:
-      - type: Percent
-        value: 50
-        periodSeconds: 60
-      - type: Pods
-        value: 2
-        periodSeconds: 60
-      selectPolicy: Min
-    scaleUp:
-      stabilizationWindowSeconds: 0
-      policies:
-      - type: Percent
-        value: 100
-        periodSeconds: 15
-      - type: Pods
-        value: 4
-        periodSeconds: 15
-      selectPolicy: Max
-"""
-        return yaml_template
+        config = {
+            "apiVersion": "autoscaling/v2",
+            "kind": "HorizontalPodAutoscaler",
+            "metadata": {"name": self.name, "namespace": self.namespace},
+            "spec": {
+                "scaleTargetRef": {
+                    "apiVersion": "apps/v1",
+                    "kind": "Deployment",
+                    "name": self.name.replace("-hpa", ""),
+                },
+                "minReplicas": self.min_replicas,
+                "maxReplicas": self.max_replicas,
+                "metrics": [
+                    {
+                        "type": "Resource",
+                        "resource": {
+                            "name": "cpu",
+                            "target": {"type": "Utilization", "averageUtilization": self.target_cpu_utilization},
+                        },
+                    },
+                    {
+                        "type": "Resource",
+                        "resource": {
+                            "name": "memory",
+                            "target": {
+                                "type": "Utilization",
+                                "averageUtilization": self.target_memory_utilization,
+                            },
+                        },
+                    },
+                ],
+                "behavior": {
+                    "scaleDown": {
+                        "stabilizationWindowSeconds": 300,
+                        "policies": [
+                            {"type": "Percent", "value": 50, "periodSeconds": 60},
+                            {"type": "Pods", "value": 2, "periodSeconds": 60},
+                        ],
+                        "selectPolicy": "Min",
+                    },
+                    "scaleUp": {
+                        "stabilizationWindowSeconds": 0,
+                        "policies": [
+                            {"type": "Percent", "value": 100, "periodSeconds": 15},
+                            {"type": "Pods", "value": 4, "periodSeconds": 15},
+                        ],
+                        "selectPolicy": "Max",
+                    },
+                },
+            },
+        }
+        return yaml.dump(config, default_flow_style=False)
 
 
 class K8sHPAManager:
@@ -237,26 +252,31 @@ class K8sHPAManager:
         Returns:
             True if successful, False otherwise
         """
+        temp_file = None
         try:
             # Generate YAML
             yaml_content = hpa_config.to_yaml()
 
-            # Write to temporary file
-            temp_file = f"/tmp/hpa-{hpa_config.name}.yaml"
-            with open(temp_file, "w") as f:
+            # Write to temporary file using tempfile for security
+            with tempfile.NamedTemporaryFile(mode="w", suffix=".yaml", delete=False) as f:
                 f.write(yaml_content)
+                temp_file = f.name
 
             # Apply using kubectl
             result = subprocess.run(["kubectl", "apply", "-f", temp_file], capture_output=True, text=True, timeout=30)
-
-            # Clean up temp file
-            os.remove(temp_file)
 
             return result.returncode == 0
 
         except Exception as e:
             print(f"Error applying HPA to cluster: {e}")
             return False
+        finally:
+            # Clean up temp file
+            if temp_file and os.path.exists(temp_file):
+                try:
+                    os.remove(temp_file)
+                except Exception as cleanup_err:
+                    print(f"Warning: Failed to remove temp file {temp_file}: {cleanup_err}")
 
     def get_current_hpa(self, name: str, namespace: str = "default") -> Optional[HPAConfiguration]:
         """

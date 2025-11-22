@@ -5,9 +5,6 @@ This module demonstrates how to integrate the AI Scaling Engine with
 various observability platforms to collect metrics in real-time.
 """
 
-import os
-from datetime import datetime, timedelta
-
 from ai_scaling_engine import AIScalingEngine, ScalingMetrics
 
 
@@ -54,9 +51,9 @@ def prometheus_integration_example():
         decision = engine.analyze_metrics(current_metrics)
 
         print(f"\nMetrics from Prometheus:")
-        print(f"  CPU: {cpu_gauge._value.get():.1f}%")
-        print(f"  Memory: {memory_gauge._value.get():.1f}%")
-        print(f"  RPS: {rps_gauge._value.get():.1f}")
+        print(f"  CPU: {current_metrics.cpu_utilization:.1f}%")
+        print(f"  Memory: {current_metrics.memory_utilization:.1f}%")
+        print(f"  RPS: {current_metrics.request_rate:.1f}")
 
         print(f"\nAI Decision:")
         print(f"  Action: {decision.action}")

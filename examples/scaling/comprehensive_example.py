@@ -13,6 +13,7 @@ import json
 import sys
 from datetime import datetime, timedelta
 from pathlib import Path
+from typing import Optional
 
 # Add parent directory to path for imports
 sys.path.insert(0, str(Path(__file__).parent))
@@ -22,7 +23,7 @@ from k8s_hpa_manager import HPAConfiguration, K8sHPAManager
 from schedule_generator import ScheduleGenerator
 
 
-def load_test_scenario(scenario_name: str) -> dict:
+def load_test_scenario(scenario_name: str) -> Optional[dict]:
     """Load a test scenario from the metrics dataset."""
     # Get the directory of this script
     script_dir = Path(__file__).parent
