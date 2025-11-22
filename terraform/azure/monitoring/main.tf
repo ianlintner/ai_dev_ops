@@ -53,6 +53,10 @@ resource "azurerm_monitor_metric_alert" "high_latency" {
     threshold        = 1000 # 1 second in milliseconds
   }
 
+  action {
+    action_group_id = azurerm_monitor_action_group.main.id
+  }
+
   tags = merge(
     var.tags,
     {
@@ -78,6 +82,10 @@ resource "azurerm_monitor_metric_alert" "high_error_rate" {
     aggregation      = "Count"
     operator         = "GreaterThan"
     threshold        = 10
+  }
+
+  action {
+    action_group_id = azurerm_monitor_action_group.main.id
   }
 
   tags = merge(

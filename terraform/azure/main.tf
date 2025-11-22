@@ -23,10 +23,15 @@ terraform {
 provider "azurerm" {
   features {
     resource_group {
+      # WARNING: Setting prevent_deletion_if_contains_resources = false allows Terraform to delete resource groups
+      # even if they contain resources. This is potentially dangerous and should NOT be used in production environments.
+      # This setting is intended for development/testing environments only.
       prevent_deletion_if_contains_resources = false
     }
     key_vault {
-      purge_soft_delete_on_destroy = true
+      # Setting purge_soft_delete_on_destroy = false maintains Azure Key Vault's soft delete protection,
+      # which prevents accidental permanent deletion. Set to true only in development/testing environments.
+      purge_soft_delete_on_destroy = false
     }
   }
 
