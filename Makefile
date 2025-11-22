@@ -43,6 +43,10 @@ test:
 	python -m py_compile examples/azure/azure_monitor_example.py
 	python -m py_compile examples/unified-correlation/correlation_framework.py
 	python -m py_compile examples/multi-agent/agents/investigation_system.py
+	python -m py_compile examples/scaling/ai_scaling_engine.py
+	python -m py_compile examples/scaling/k8s_hpa_manager.py
+	python -m py_compile examples/scaling/schedule_generator.py
+	python -m py_compile examples/scaling/comprehensive_example.py
 	python -m py_compile mcp-server/tools.py
 	@echo "Running OpenTelemetry example..."
 	timeout 5 python examples/opentelemetry/basic_instrumentation.py || exit 0
@@ -52,6 +56,10 @@ test:
 	python -m py_compile examples/unified-correlation/correlation_framework.py
 	@echo "Testing multi-agent system..."
 	timeout 10 python examples/multi-agent/agents/investigation_system.py || exit 0
+	@echo "Testing AI scaling engine..."
+	timeout 10 python examples/scaling/ai_scaling_engine.py || exit 0
+	@echo "Testing comprehensive scaling example..."
+	timeout 15 python examples/scaling/comprehensive_example.py || exit 0
 
 validate:
 	@echo "Validating JSON schemas..."

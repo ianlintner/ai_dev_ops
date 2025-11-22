@@ -1,0 +1,192 @@
+{
+  "description": "Realistic metrics dataset for testing AI-powered scaling decisions",
+  "scenarios": [
+    {
+      "scenario": "normal_load",
+      "description": "Normal operational load with stable metrics",
+      "duration_minutes": 60,
+      "metrics": {
+        "cpu_utilization_percent": [45, 47, 46, 48, 45, 44, 46, 47, 45, 46],
+        "memory_utilization_percent": [55, 56, 54, 55, 57, 56, 55, 54, 56, 55],
+        "request_rate_per_second": [120, 125, 118, 122, 119, 123, 121, 124, 120, 122],
+        "response_time_ms": [85, 82, 88, 84, 86, 83, 85, 87, 84, 86],
+        "error_rate_percent": [0.5, 0.4, 0.6, 0.5, 0.4, 0.5, 0.6, 0.4, 0.5, 0.4],
+        "active_connections": [450, 460, 445, 455, 448, 452, 450, 458, 446, 454],
+        "queue_depth": [5, 6, 4, 5, 6, 5, 4, 5, 6, 5],
+        "pod_count": [3, 3, 3, 3, 3, 3, 3, 3, 3, 3]
+      },
+      "recommended_action": "maintain",
+      "reasoning": "All metrics within normal ranges, system operating efficiently"
+    },
+    {
+      "scenario": "high_load_spike",
+      "description": "Sudden spike in load requiring immediate horizontal scaling",
+      "duration_minutes": 30,
+      "metrics": {
+        "cpu_utilization_percent": [48, 65, 78, 82, 85, 88, 90, 92, 89, 87],
+        "memory_utilization_percent": [56, 62, 70, 75, 78, 82, 85, 88, 86, 84],
+        "request_rate_per_second": [122, 280, 450, 520, 580, 620, 650, 680, 640, 610],
+        "response_time_ms": [86, 145, 285, 420, 580, 750, 920, 1100, 980, 850],
+        "error_rate_percent": [0.5, 1.2, 2.8, 4.5, 6.2, 8.5, 11.2, 14.5, 12.8, 10.5],
+        "active_connections": [452, 850, 1420, 1680, 1920, 2150, 2380, 2520, 2340, 2180],
+        "queue_depth": [5, 18, 45, 68, 95, 125, 158, 185, 165, 142],
+        "pod_count": [3, 3, 3, 3, 3, 3, 3, 3, 3, 3]
+      },
+      "recommended_action": "scale_up_horizontal",
+      "recommended_pod_count": 12,
+      "reasoning": "CPU >85%, response time >1s, error rate >10%, queue depth >150. Immediate horizontal scaling required"
+    },
+    {
+      "scenario": "gradual_load_increase",
+      "description": "Gradual load increase over several hours, suitable for scheduled scaling",
+      "duration_minutes": 240,
+      "metrics": {
+        "cpu_utilization_percent": [45, 52, 58, 64, 68, 72, 75, 78, 76, 74],
+        "memory_utilization_percent": [55, 60, 64, 68, 72, 75, 78, 80, 79, 77],
+        "request_rate_per_second": [120, 165, 210, 255, 290, 325, 355, 380, 365, 340],
+        "response_time_ms": [85, 105, 128, 155, 185, 215, 245, 280, 265, 240],
+        "error_rate_percent": [0.5, 0.7, 1.1, 1.6, 2.2, 2.8, 3.5, 4.2, 3.8, 3.2],
+        "active_connections": [450, 620, 790, 960, 1100, 1240, 1370, 1480, 1420, 1320],
+        "queue_depth": [5, 12, 22, 35, 48, 62, 78, 95, 86, 74],
+        "pod_count": [3, 3, 3, 3, 3, 3, 3, 3, 3, 3]
+      },
+      "recommended_action": "scale_up_horizontal_scheduled",
+      "recommended_pod_count": 8,
+      "recommended_schedule": "predictable pattern suggests scheduling 8 pods 2 hours before peak",
+      "reasoning": "Gradual increase pattern detected. CPU trending to 75%+, predictable load increase"
+    },
+    {
+      "scenario": "memory_constrained",
+      "description": "High memory pressure requiring vertical scaling",
+      "duration_minutes": 45,
+      "metrics": {
+        "cpu_utilization_percent": [52, 54, 53, 55, 54, 56, 55, 54, 53, 55],
+        "memory_utilization_percent": [78, 82, 86, 89, 92, 94, 96, 98, 97, 95],
+        "request_rate_per_second": [180, 185, 182, 188, 184, 186, 183, 187, 185, 184],
+        "response_time_ms": [125, 148, 185, 235, 298, 385, 495, 620, 580, 520],
+        "error_rate_percent": [1.2, 2.5, 4.2, 6.8, 9.5, 12.8, 16.5, 20.2, 18.5, 15.8],
+        "active_connections": [680, 695, 685, 702, 688, 698, 692, 705, 695, 690],
+        "queue_depth": [15, 28, 45, 68, 92, 118, 145, 178, 162, 142],
+        "pod_count": [5, 5, 5, 5, 5, 5, 5, 5, 5, 5]
+      },
+      "recommended_action": "scale_up_vertical",
+      "recommended_memory_increase": "50%",
+      "reasoning": "Memory >95%, high error rate and response time despite moderate CPU. Vertical scaling needed"
+    },
+    {
+      "scenario": "over_provisioned",
+      "description": "System over-provisioned with consistently low utilization",
+      "duration_minutes": 120,
+      "metrics": {
+        "cpu_utilization_percent": [12, 14, 11, 13, 15, 12, 14, 13, 11, 12],
+        "memory_utilization_percent": [22, 24, 21, 23, 25, 23, 22, 24, 23, 22],
+        "request_rate_per_second": [45, 48, 42, 46, 50, 47, 44, 49, 46, 45],
+        "response_time_ms": [35, 32, 38, 34, 31, 36, 33, 35, 37, 34],
+        "error_rate_percent": [0.1, 0.2, 0.1, 0.1, 0.2, 0.1, 0.2, 0.1, 0.1, 0.2],
+        "active_connections": [180, 190, 175, 185, 195, 188, 182, 192, 186, 184],
+        "queue_depth": [0, 1, 0, 0, 1, 0, 1, 0, 0, 1],
+        "pod_count": [8, 8, 8, 8, 8, 8, 8, 8, 8, 8]
+      },
+      "recommended_action": "scale_down_horizontal",
+      "recommended_pod_count": 3,
+      "reasoning": "CPU <15%, memory <25%, excellent response times. System significantly over-provisioned"
+    },
+    {
+      "scenario": "daily_peak_pattern",
+      "description": "Recurring daily pattern with morning and evening peaks",
+      "duration_minutes": 1440,
+      "hourly_metrics": [
+        {"hour": 0, "cpu": 25, "memory": 35, "rps": 50, "response_ms": 45, "pods": 3},
+        {"hour": 1, "cpu": 22, "memory": 32, "rps": 42, "response_ms": 42, "pods": 3},
+        {"hour": 2, "cpu": 20, "memory": 30, "rps": 38, "response_ms": 40, "pods": 3},
+        {"hour": 3, "cpu": 18, "memory": 28, "rps": 35, "response_ms": 38, "pods": 3},
+        {"hour": 4, "cpu": 20, "memory": 30, "rps": 40, "response_ms": 40, "pods": 3},
+        {"hour": 5, "cpu": 28, "memory": 38, "rps": 75, "response_ms": 55, "pods": 3},
+        {"hour": 6, "cpu": 42, "memory": 52, "rps": 150, "response_ms": 75, "pods": 3},
+        {"hour": 7, "cpu": 58, "memory": 68, "rps": 280, "response_ms": 125, "pods": 3},
+        {"hour": 8, "cpu": 72, "memory": 78, "rps": 420, "response_ms": 185, "pods": 5},
+        {"hour": 9, "cpu": 85, "memory": 88, "rps": 580, "response_ms": 285, "pods": 8},
+        {"hour": 10, "cpu": 78, "memory": 82, "rps": 480, "response_ms": 215, "pods": 8},
+        {"hour": 11, "cpu": 68, "memory": 72, "rps": 380, "response_ms": 165, "pods": 6},
+        {"hour": 12, "cpu": 62, "memory": 68, "rps": 320, "response_ms": 142, "pods": 5},
+        {"hour": 13, "cpu": 58, "memory": 64, "rps": 285, "response_ms": 128, "pods": 5},
+        {"hour": 14, "cpu": 55, "memory": 62, "rps": 260, "response_ms": 118, "pods": 4},
+        {"hour": 15, "cpu": 52, "memory": 58, "rps": 240, "response_ms": 105, "pods": 4},
+        {"hour": 16, "cpu": 58, "memory": 64, "rps": 290, "response_ms": 135, "pods": 5},
+        {"hour": 17, "cpu": 68, "memory": 72, "rps": 370, "response_ms": 168, "pods": 6},
+        {"hour": 18, "cpu": 78, "memory": 80, "rps": 460, "response_ms": 205, "pods": 7},
+        {"hour": 19, "cpu": 82, "memory": 85, "rps": 520, "response_ms": 248, "pods": 8},
+        {"hour": 20, "cpu": 75, "memory": 78, "rps": 440, "response_ms": 195, "pods": 7},
+        {"hour": 21, "cpu": 62, "memory": 68, "rps": 330, "response_ms": 152, "pods": 5},
+        {"hour": 22, "cpu": 45, "memory": 52, "rps": 185, "response_ms": 95, "pods": 4},
+        {"hour": 23, "cpu": 32, "memory": 42, "rps": 98, "response_ms": 62, "pods": 3}
+      ],
+      "recommended_action": "create_scaling_schedule",
+      "recommended_schedule": {
+        "06:00": {"pods": 5, "reason": "Pre-scale for morning peak"},
+        "08:00": {"pods": 8, "reason": "Morning peak hours"},
+        "11:00": {"pods": 6, "reason": "Post-morning peak stabilization"},
+        "16:00": {"pods": 7, "reason": "Pre-scale for evening peak"},
+        "19:00": {"pods": 8, "reason": "Evening peak hours"},
+        "21:00": {"pods": 5, "reason": "Peak declining"},
+        "23:00": {"pods": 3, "reason": "Low traffic overnight"}
+      },
+      "reasoning": "Clear daily pattern with two peaks. Schedule-based scaling optimizes costs and performance"
+    },
+    {
+      "scenario": "weekend_low_traffic",
+      "description": "Weekend traffic pattern with consistently lower load",
+      "duration_minutes": 2880,
+      "day_type": "weekend",
+      "metrics": {
+        "cpu_utilization_percent": [18, 20, 19, 21, 20, 18, 19, 20, 19, 18],
+        "memory_utilization_percent": [28, 30, 29, 31, 30, 28, 29, 30, 29, 28],
+        "request_rate_per_second": [42, 48, 45, 52, 48, 44, 46, 50, 47, 43],
+        "response_time_ms": [38, 42, 40, 45, 42, 39, 41, 44, 41, 39],
+        "error_rate_percent": [0.2, 0.3, 0.2, 0.3, 0.3, 0.2, 0.2, 0.3, 0.2, 0.2],
+        "active_connections": [168, 185, 176, 195, 183, 172, 178, 190, 180, 170],
+        "queue_depth": [1, 2, 1, 2, 2, 1, 1, 2, 1, 1],
+        "pod_count": [5, 5, 5, 5, 5, 5, 5, 5, 5, 5]
+      },
+      "recommended_action": "scale_down_scheduled",
+      "recommended_pod_count": 2,
+      "recommended_schedule": {
+        "friday_22:00": {"pods": 2, "reason": "Reduce for weekend low traffic"},
+        "monday_05:00": {"pods": 3, "reason": "Pre-scale for weekday traffic"}
+      },
+      "reasoning": "Weekend traffic 60% lower than weekday. Schedule-based scaling for weekend cost optimization"
+    },
+    {
+      "scenario": "flash_sale_event",
+      "description": "Planned high-traffic event requiring pre-scaling",
+      "duration_minutes": 120,
+      "event_type": "flash_sale",
+      "metrics": {
+        "cpu_utilization_percent": [45, 92, 95, 88, 82, 78, 72, 65, 58, 50],
+        "memory_utilization_percent": [55, 88, 92, 85, 80, 75, 70, 65, 60, 56],
+        "request_rate_per_second": [120, 1200, 1500, 1200, 950, 720, 550, 380, 250, 180],
+        "response_time_ms": [85, 420, 680, 520, 385, 280, 195, 145, 110, 90],
+        "error_rate_percent": [0.5, 8.5, 15.2, 9.8, 6.2, 3.8, 2.2, 1.5, 0.9, 0.6],
+        "active_connections": [450, 4200, 5800, 4600, 3500, 2600, 1900, 1400, 950, 680],
+        "queue_depth": [5, 185, 285, 210, 155, 108, 72, 45, 28, 15],
+        "pod_count": [3, 3, 15, 15, 15, 12, 10, 8, 6, 5]
+      },
+      "recommended_action": "event_based_scaling",
+      "recommended_schedule": {
+        "event_start_minus_15min": {"pods": 15, "reason": "Pre-scale before flash sale"},
+        "event_start_plus_60min": {"pods": 12, "reason": "Maintain capacity during high load"},
+        "event_start_plus_90min": {"pods": 8, "reason": "Gradual scale down"},
+        "event_start_plus_120min": {"pods": 5, "reason": "Return to normal capacity"}
+      },
+      "reasoning": "Planned event with 10x traffic spike. Pre-scaling critical to handle initial burst"
+    }
+  ],
+  "metadata": {
+    "generated_at": "2025-11-21T16:20:00Z",
+    "version": "1.0",
+    "purpose": "integration_testing",
+    "service": "ai-inference-api",
+    "environment": "production",
+    "cluster": "prod-us-east-1"
+  }
+}
