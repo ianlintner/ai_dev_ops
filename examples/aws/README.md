@@ -21,7 +21,7 @@ pip install boto3>=1.34.0 aws-xray-sdk>=2.12.0
 Or install from the root requirements.txt:
 
 ```bash
-cd /home/runner/work/ai_dev_ops/ai_dev_ops
+cd ../..  # Navigate to repository root
 pip install -r requirements.txt
 ```
 
