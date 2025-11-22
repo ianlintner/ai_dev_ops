@@ -68,6 +68,7 @@ node_pools = {
     min_count           = 2
     max_count           = 10
     enable_auto_scaling = true
+    max_pods            = 110
   }
   ai_workload = {
     vm_size             = "Standard_D8s_v3"
@@ -75,6 +76,7 @@ node_pools = {
     min_count           = 2
     max_count           = 20
     enable_auto_scaling = true
+    max_pods            = 110
   }
 }
 
