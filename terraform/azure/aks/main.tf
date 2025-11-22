@@ -39,8 +39,10 @@ resource "azurerm_kubernetes_cluster" "main" {
     network_plugin    = "azure"
     network_policy    = "calico"
     load_balancer_sku = "standard"
-    service_cidr      = "172.16.0.0/16"
-    dns_service_ip    = "172.16.0.10"
+    # Service CIDR for Kubernetes services (172.16.0.0/16 to avoid conflicts with common private networks)
+    service_cidr   = "172.16.0.0/16"
+    # DNS service IP must be within the service CIDR range
+    dns_service_ip = "172.16.0.10"
   }
 
   dynamic "oms_agent" {
