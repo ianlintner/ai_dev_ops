@@ -7,10 +7,10 @@ A comprehensive repository providing production-ready infrastructure, monitoring
 ## 📋 Overview
 
 This repository provides complete infrastructure-as-code, deployment manifests, and observability integrations for:
-- **Cloud Infrastructure**: Production-ready Terraform modules for AWS and GCP
+- **Cloud Infrastructure**: Production-ready Terraform modules for AWS, Azure, and GCP
 - **Kubernetes Deployments**: Complete manifests and Helm charts for AI services
 - **AI Model Observability**: Comprehensive monitoring and tracing for AI/ML models
-- **Multi-Cloud Integration**: AWS CloudWatch, X-Ray, GCP Cloud Monitoring, Datadog
+- **Multi-Cloud Integration**: AWS CloudWatch & X-Ray, Azure Monitor & Application Insights, GCP Cloud Monitoring, Datadog
 - **Advanced Patterns**: Caching, security, rate limiting, and PII detection
 - **Platform Integrations**: Ready-to-deploy configurations for popular monitoring tools
 - **🆕 Unified Correlation**: Single correlation ID links all telemetry (traces, logs, metrics)
@@ -23,6 +23,7 @@ This repository provides complete infrastructure-as-code, deployment manifests, 
 ai_dev_ops/
 ├── terraform/          # Infrastructure as Code
 │   ├── aws/            # AWS EKS, VPC, IAM, CloudWatch
+│   ├── azure/          # Azure AKS, VNet, Application Insights
 │   └── gcp/            # GCP GKE, VPC, IAM, Cloud Monitoring
 ├── kubernetes/         # Kubernetes manifests
 │   ├── base/           # Base Kustomize resources
@@ -82,6 +83,11 @@ pip install -r requirements.txt
 ```bash
 # AWS
 cd terraform/aws
+terraform init
+terraform apply
+
+# Azure
+cd terraform/azure
 terraform init
 terraform apply
 
@@ -250,6 +256,17 @@ Complete production-ready infrastructure:
 - **X-Ray**: Distributed tracing
 
 Deploy with Terraform: [terraform/aws](./terraform/aws/)
+
+### Azure Infrastructure
+Complete Azure deployment:
+- **AKS Cluster**: Managed Kubernetes with system and AI workload node pools
+- **VNet**: Virtual network with network security groups
+- **Application Insights**: Application performance monitoring
+- **Log Analytics**: Centralized logging and analytics
+- **Container Insights**: Container and cluster monitoring
+- **Azure Monitor**: Custom metrics and alerts
+
+Deploy with Terraform: [terraform/azure](./terraform/azure/)
 
 ### GCP Infrastructure
 Full GCP deployment:
